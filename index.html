@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level-Up Ladder Workout (Enhanced)</title>
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap");
+
+        :root {
+            --hue-start: 200;
+            --hue-end: 300;
+            --primary-color: hsl(var(--hue-start), 70%, 60%);
+            --secondary-color: hsl(var(--hue-start), 50%, 95%);
+            --text-color: #333;
+            --bg-color: #f4f7fc;
+            --ladder-bg: #e0e6f0;
+            --ladder-rung: #c0c8d8;
+            --button-bg: var(--primary-color);
+            --button-text: white;
+            --celebration-bg: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            --font-family: "Poppins", sans-serif;
+            --restart-button-bg: #f44336;
+            --restart-button-hover: #d32f2f;
+            --leaderboard-bg: rgba(255, 255, 255, 0.95);
+            --easy-mode-color: #4CAF50;
+            --normal-mode-color: #2196F3;
+            --hard-mode-color: #F44336;
+            --achievement-color: #FFC107;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: background-color 0.5s ease;
+        }
+
+        .app-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+            display: none; /* Hidden initially, shown after muscle group selection */
+        }
+
+        .ladder-visual {
+            width: 80%;
+            margin: 20px auto;
+            padding: 10px;
+            background: var(--ladder-bg);
+            border-radius: 8px;
+            position: relative;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.5s ease;
+        }
+
+        .ladder-level {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary-color);
+            background-color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: color 0.5s ease;
+        }
+
+        .workout-info {
+            margin: 30px 0;
+            min-height: 100px;
+            position: relative;
+        }
+
+        .exercise-details {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .exercise-details.fade-out {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .exercise-details.fade-in {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2em;
+            font-weight: 700;
+            transition: color 0.5s ease;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .timer {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            transition: color 0.5s ease;
+        }
+
+        .done-button {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .done-button:hover {
+            filter: brightness(1.1);
+        }
+
+        .done-button:active {
+            transform: scale(0.98);
+        }
+
+        .message {
+            margin-top: 20px;
+            font-style: italic;
+            color: #555;
+            min-height: 20px;
+            font-weight: 600;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .mute-button, .leaderboard-button, .settings-button {
+            background: none;
+            border: 1px solid #ccc;
+            color: #888;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .mute-button:hover, .leaderboard-button:hover, .settings-button:hover {
+            background-color: #eee;
+            color: #555;
+        }
+
+        .progress-tracker {
+            font-size: 0.9em;
+            color: #777;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .celebration-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--celebration-bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+            z-index: 10;
+        }
+
+        .celebration-screen.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .celebration-screen h2 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            animation: celebratory-text-pop 1s ease-out forwards;
+        }
+
+        .confetti-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: var(--color);
+            opacity: 0.7;
+            animation: confetti-fall 3s linear infinite;
+        }
+
+        /* Restart button styles */
+        .restart-button {
+            background-color: var(--restart-button-bg);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .restart-button:hover {
+            background-color: var(--restart-button-hover);
+        }
+
+        .restart-button:active {
+            transform: scale(0.95);
+        }
+
+        .restart-confirm {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .restart-confirm.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .restart-confirm-box {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .restart-confirm-box h3 {
+            margin-top: 0;
+            color: var(--text-color);
+        }
+
+        .restart-confirm-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .restart-confirm-yes {
+            background-color: var(--restart-button-bg);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .restart-confirm-no {
+            background-color: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Leaderboard styles */
+        .leaderboard-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--leaderboard-bg);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .leaderboard-panel.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .leaderboard-header .workout-selector {
+            margin-left: auto;
+            margin-right: 15px;
+        }
+        
+        .workout-selector label {
+            margin-right: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .workout-selector select {
+            padding: 5px 10px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+        }
+
+        .leaderboard-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .leaderboard-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-tab {
+            padding: 8px 15px;
+            border: none;
+            background-color: #eee;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .leaderboard-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .leaderboard-table th {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .leaderboard-add {
+            margin-top: 20px;
+        }
+
+        .leaderboard-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .leaderboard-input {
+            flex: 1;
+            padding: 8px 15px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            font-family: var(--font-family);
+        }
+
+        .leaderboard-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Settings panel styles */
+        .settings-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--leaderboard-bg);
+            display: flex;
+            flex-direction: column;
+            z-index: 20;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+        }
+
+        .settings-panel.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .settings-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .settings-section {
+            margin-bottom: 20px;
+        }
+
+        .settings-section h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .difficulty-button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.2s;
+            position: relative;
+        }
+
+        .difficulty-button:active {
+            transform: scale(0.95);
+        }
+
+        .difficulty-button.easy {
+            background-color: var(--easy-mode-color);
+            color: white;
+        }
+
+        .difficulty-button.normal {
+            background-color: var(--normal-mode-color);
+            color: white;
+        }
+
+        .difficulty-button.hard {
+            background-color: var(--hard-mode-color);
+            color: white;
+        }
+
+        /* Improved difficulty selection in settings */
+        .difficulty-button.active {
+            box-shadow: 0 0 0 3px white, 0 0 0 5px currentColor;
+        }
+
+        .difficulty-button.active::after {
+            content: "✓";
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: white;
+            color: currentColor;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: bold;
+            border: 2px solid currentColor;
+        }
+
+        .notification-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        /* Daily challenge styles */
+        .daily-challenge {
+            background-color: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        .daily-challenge h3 {
+            color: var(--achievement-color);
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .daily-challenge-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--achievement-color);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Muscle Group Selection Styles */
+        .muscle-group-selection-panel {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+            box-sizing: border-box;
+            z-index: 100;
+            overflow-y: auto;
+        }
+
+        .selection-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .selection-header h2 {
+            color: var(--primary-color);
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .selection-header p {
+            color: var(--text-color);
+            font-size: 1.1em;
+        }
+
+        .muscle-group-options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .muscle-group-option {
+            width: calc(33.33% - 15px);
+            min-width: 120px;
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .muscle-group-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .muscle-group-option.selected {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .muscle-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .muscle-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .selection-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .selection-button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .selection-button:active {
+            transform: scale(0.98);
+        }
+
+        .selection-button.start {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .selection-button.start:hover {
+            filter: brightness(1.1);
+        }
+
+        .selection-button.start.disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .selection-button.select-all {
+            background-color: #f0f0f0;
+            color: var(--text-color);
+        }
+
+        .selection-button.select-all:hover {
+            background-color: #e0e0e0;
+        }
+
+        .selection-button.clear {
+            background-color: #f0f0f0;
+            color: var(--text-color);
+        }
+
+        .selection-button.clear:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Workout type badge */
+        .workout-type-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            z-index: 5;
+        }
+
+        /* Progress tracking for different workouts */
+        .workout-progress-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+        }
+
+        .workout-progress-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .workout-progress-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .workout-progress-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .workout-progress-name {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .workout-progress-level {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .muscle-group-option {
+                width: calc(50% - 15px);
+            }
+            .app-container {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .muscle-group-option {
+                width: 100%;
+            }
+            
+            .selection-header h2 {
+                font-size: 1.8em;
+            }
+            
+            .muscle-group-selection-panel {
+                padding: 20px;
+            }
+            .app-container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            h2 {
+                font-size: 1.5em;
+            }
+            .done-button {
+                padding: 12px 25px;
+                font-size: 1.1em;
+            }
+        }
+
+        /* Animations */
+        @keyframes celebratory-text-pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Muscle Group Selection Panel (will be created by JS) -->
+
+    <div class="app-container">
+        <h1>Level-Up Ladder</h1>
+        <div class="ladder-visual">
+            <span class="ladder-level" id="level-display">Level 1</span>
+        </div>
+
+        <div class="workout-info">
+            <div class="exercise-details" id="exercise-details">
+                <h2 id="exercise-name">Get Ready!</h2>
+                <p id="exercise-instruction">Select your muscle groups to start.</p>
+                <div class="timer" id="timer-display"></div>
+            </div>
+        </div>
+
+        <button class="done-button" id="action-button">Done!</button>
+        <div class="message" id="message-display">Let's get moving!</div>
+
+        <div class="controls">
+            <div class="control-buttons">
+                <button class="mute-button" id="mute-button">Mute</button>
+                <button class="leaderboard-button" id="leaderboard-button">🏆 Leaderboard</button>
+                <button class="settings-button" id="settings-button">⚙️ Settings</button>
+                <button class="restart-button" id="restart-button">Restart</button>
+            </div>
+            <div class="progress-tracker" id="progress-tracker">Progress: Level 1</div>
+        </div>
+        
+        <div class="daily-challenge" id="daily-challenge-container" style="display: none;">
+            <div class="daily-challenge-badge">!</div>
+            <h3>Daily Challenge</h3>
+            <p id="daily-challenge-description"></p>
+        </div>
+    </div>
+
+    <div class="celebration-screen" id="celebration-screen">
+        <div class="confetti-container" id="confetti-container"></div>
+        <h2>You Did It!</h2>
+        <p>Congratulations on completing all 100 levels!</p>
+        <button class="restart-button" id="celebration-restart-button">Start Over</button>
+    </div>
+
+    <div class="restart-confirm" id="restart-confirm">
+        <div class="restart-confirm-box">
+            <h3>Restart Workout?</h3>
+            <p>Are you sure you want to restart from Level 1? Your current progress for this workout type will be reset.</p>
+            <div class="restart-confirm-buttons">
+                <button class="restart-confirm-yes" id="restart-confirm-yes">Yes, Restart</button>
+                <button class="restart-confirm-no" id="restart-confirm-no">No, Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="leaderboard-panel" id="leaderboard-panel">
+        <div class="leaderboard-header">
+            <h2>Leaderboard</h2>
+            <!-- Workout Selector will be added here by JS -->
+            <button class="leaderboard-close" id="leaderboard-close">&times;</button>
+        </div>
+        <div class="leaderboard-tabs">
+            <button class="leaderboard-tab active" id="level-tab">Highest Level</button>
+            <button class="leaderboard-tab" id="time-tab">Fastest Time</button>
+        </div>
+        <div id="level-leaderboard">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr><th>Rank</th><th>Name</th><th>Level</th><th>Date</th></tr>
+                </thead>
+                <tbody id="level-table-body"></tbody>
+            </table>
+        </div>
+        <div id="time-leaderboard" style="display: none;">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr><th>Rank</th><th>Name</th><th>Time</th><th>Date</th></tr>
+                </thead>
+                <tbody id="time-table-body"></tbody>
+            </table>
+        </div>
+        <div class="leaderboard-add">
+            <h4>Add Your Score</h4>
+            <div class="leaderboard-form">
+                <input type="text" id="leaderboard-name" class="leaderboard-input" placeholder="Enter your name">
+                <button class="leaderboard-submit" id="leaderboard-submit">Submit</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-panel" id="settings-panel">
+        <div class="settings-header">
+            <h2>Settings</h2>
+            <button class="settings-close" id="settings-close">&times;</button>
+        </div>
+        <div class="settings-section">
+            <h3>Difficulty</h3>
+            <div class="difficulty-buttons">
+                <button class="difficulty-button easy" id="easy-mode">Easy</button>
+                <button class="difficulty-button normal active" id="normal-mode">Normal</button>
+                <button class="difficulty-button hard" id="hard-mode">Hard</button>
+            </div>
+        </div>
+        <div class="settings-section">
+            <h3>Notifications</h3>
+            <div class="notification-toggle">
+                <span>Daily Challenges & Achievements</span>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="notification-toggle">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+        </div>
+        <!-- Workout Progress Summary will be added here by JS -->
+    </div>
+
+    <div class="notification" id="notification">
+        <span id="notification-message">Achievement Unlocked!</span>
+    </div>
+
+    <script>
+        // --- Enhanced Exercise Data Structure ---
+        const muscleGroupExercises = {
+            muscleGroups: [
+                { id: "arms", name: "Arms", icon: "💪" },
+                { id: "legs", name: "Legs", icon: "🦵" },
+                { id: "core", name: "Core", icon: "🧘" },
+                { id: "chest", name: "Chest", icon: "👕" },
+                { id: "back", name: "Back", icon: "🔙" },
+                { id: "shoulders", name: "Shoulders", icon: "🏋️" },
+                { id: "fullBody", name: "Full Body", icon: "👤" },
+                { id: "cardio", name: "Cardio", icon: "🏃" }
+            ],
+            exercises: [
+                { level: 1, options: [ { name: "Jumping Jacks", count: 3, type: "cardio", timed: false, muscleGroups: ["cardio", "fullBody"] }, { name: "Arm Circles", count: 5, type: "flexibility", timed: false, muscleGroups: ["arms", "shoulders"] }, { name: "Marching in Place", count: 10, type: "cardio", timed: false, muscleGroups: ["cardio", "legs"] } ] },
+                { level: 2, options: [ { name: "Squats", count: 5, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Calf Raises", count: 8, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Side Steps", count: 10, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] } ] },
+                { level: 3, options: [ { name: "Shoulder Circles", count: 7, type: "flexibility", timed: false, muscleGroups: ["shoulders"] }, { name: "Neck Stretches", count: 5, type: "flexibility", timed: false, muscleGroups: ["shoulders"] }, { name: "Wrist Rotations", count: 10, type: "flexibility", timed: false, muscleGroups: ["arms"] } ] },
+                { level: 4, options: [ { name: "Arm Swings", count: 10, type: "flexibility", timed: false, muscleGroups: ["arms", "shoulders"] }, { name: "Torso Twists", count: 8, type: "flexibility", timed: false, muscleGroups: ["core"] }, { name: "Arm Raises", count: 12, type: "flexibility", timed: false, muscleGroups: ["arms", "shoulders"] } ] },
+                { level: 5, options: [ { name: "High Knees", count: 12, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] }, { name: "Butt Kicks", count: 12, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] }, { name: "Lateral Shuffles", count: 10, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] } ] },
+                { level: 6, options: [ { name: "Push-ups", count: 5, type: "strength", timed: false, muscleGroups: ["chest", "arms", "shoulders"] }, { name: "Modified Push-ups", count: 8, type: "strength", timed: false, muscleGroups: ["chest", "arms"] }, { name: "Wall Push-ups", count: 10, type: "strength", timed: false, muscleGroups: ["chest", "arms"] } ] },
+                { level: 7, options: [ { name: "Side Stretches", count: 8, type: "flexibility", timed: false, muscleGroups: ["core"] }, { name: "Standing Side Bends", count: 10, type: "flexibility", timed: false, muscleGroups: ["core"] }, { name: "Seated Side Reaches", count: 8, type: "flexibility", timed: false, muscleGroups: ["core"] } ] },
+                { level: 8, options: [ { name: "Lunges", count: 6, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Reverse Lunges", count: 6, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Side Lunges", count: 6, type: "strength", timed: false, muscleGroups: ["legs"] } ] },
+                { level: 9, options: [ { name: "Toe Touches", count: 10, type: "flexibility", timed: false, muscleGroups: ["core", "legs"] }, { name: "Hamstring Stretches", count: 10, type: "flexibility", timed: false, muscleGroups: ["legs"] }, { name: "Standing Forward Bend", count: 10, type: "flexibility", timed: true, muscleGroups: ["core", "legs"] } ] },
+                { level: 10, options: [ { name: "Mountain Climbers", count: 15, type: "cardio", timed: false, muscleGroups: ["core", "cardio", "arms"] }, { name: "Plank Jacks", count: 12, type: "cardio", timed: false, muscleGroups: ["core", "cardio", "shoulders"] }, { name: "Jumping Jacks", count: 20, type: "cardio", timed: false, muscleGroups: ["cardio", "fullBody"] } ] },
+                { level: 11, options: [ { name: "Plank", count: 15, type: "strength", timed: true, muscleGroups: ["core", "arms", "shoulders"] }, { name: "Side Plank", count: 10, type: "strength", timed: true, muscleGroups: ["core", "shoulders"] }, { name: "Forearm Plank", count: 15, type: "strength", timed: true, muscleGroups: ["core", "arms"] } ] },
+                { level: 12, options: [ { name: "Jumping Rope", count: 20, type: "cardio", timed: false, muscleGroups: ["cardio", "legs"] }, { name: "Imaginary Jump Rope", count: 25, type: "cardio", timed: false, muscleGroups: ["cardio", "legs"] }, { name: "Jumping Jacks", count: 20, type: "cardio", timed: false, muscleGroups: ["cardio", "fullBody"] } ] },
+                { level: 13, options: [ { name: "Tricep Dips", count: 8, type: "strength", timed: false, muscleGroups: ["arms"] }, { name: "Chair Dips", count: 10, type: "strength", timed: false, muscleGroups: ["arms"] }, { name: "Bench Dips", count: 8, type: "strength", timed: false, muscleGroups: ["arms"] } ] },
+                { level: 14, options: [ { name: "Neck Rolls", count: 10, type: "flexibility", timed: false, muscleGroups: ["shoulders"] }, { name: "Neck Tilts", count: 12, type: "flexibility", timed: false, muscleGroups: ["shoulders"] }, { name: "Shoulder Shrugs", count: 15, type: "flexibility", timed: false, muscleGroups: ["shoulders"] } ] },
+                { level: 15, options: [ { name: "Burpees", count: 5, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Modified Burpees", count: 8, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Half Burpees", count: 10, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] } ] },
+                { level: 16, options: [ { name: "Calf Raises", count: 15, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Single Leg Calf Raises", count: 10, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Seated Calf Raises", count: 20, type: "strength", timed: false, muscleGroups: ["legs"] } ] },
+                { level: 17, options: [ { name: "Arm Circles", count: 12, type: "flexibility", timed: false, muscleGroups: ["arms", "shoulders"] }, { name: "Reverse Arm Circles", count: 12, type: "flexibility", timed: false, muscleGroups: ["arms", "shoulders"] }, { name: "Arm Swings", count: 15, type: "flexibility", timed: false, muscleGroups: ["arms", "shoulders"] } ] },
+                { level: 18, options: [ { name: "Sit-ups", count: 10, type: "strength", timed: false, muscleGroups: ["core"] }, { name: "Crunches", count: 15, type: "strength", timed: false, muscleGroups: ["core"] }, { name: "Bicycle Crunches", count: 12, type: "strength", timed: false, muscleGroups: ["core"] } ] },
+                { level: 19, options: [ { name: "Jog in Place", count: 30, type: "cardio", timed: true, muscleGroups: ["cardio", "legs"] }, { name: "High Knees", count: 25, type: "cardio", timed: true, muscleGroups: ["cardio", "legs"] }, { name: "Butt Kicks", count: 30, type: "cardio", timed: true, muscleGroups: ["cardio", "legs"] } ] },
+                { level: 20, options: [ { name: "Side Planks", count: 10, type: "strength", timed: true, muscleGroups: ["core", "shoulders"] }, { name: "Plank with Leg Lift", count: 10, type: "strength", timed: true, muscleGroups: ["core", "legs"] }, { name: "Plank Shoulder Taps", count: 12, type: "strength", timed: true, muscleGroups: ["core", "shoulders", "arms"] } ] },
+                { level: 21, options: [ { name: "Butterfly Stretch", count: 20, type: "flexibility", timed: true, muscleGroups: ["legs"] }, { name: "Hip Openers", count: 15, type: "flexibility", timed: true, muscleGroups: ["legs"] }, { name: "Seated Straddle", count: 20, type: "flexibility", timed: true, muscleGroups: ["legs"] } ] },
+                { level: 22, options: [ { name: "Squat Jumps", count: 10, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] }, { name: "Jump Squats", count: 12, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] }, { name: "Explosive Squats", count: 10, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] } ] },
+                { level: 23, options: [ { name: "Bicycle Crunches", count: 15, type: "strength", timed: false, muscleGroups: ["core"] }, { name: "Russian Twists", count: 20, type: "strength", timed: false, muscleGroups: ["core"] }, { name: "Leg Raises", count: 12, type: "strength", timed: false, muscleGroups: ["core", "legs"] } ] },
+                { level: 24, options: [ { name: "Wrist Rotations", count: 20, type: "flexibility", timed: false, muscleGroups: ["arms"] }, { name: "Wrist Stretches", count: 15, type: "flexibility", timed: false, muscleGroups: ["arms"] }, { name: "Finger Stretches", count: 20, type: "flexibility", timed: false, muscleGroups: ["arms"] } ] },
+                { level: 25, options: [ { name: "Star Jumps", count: 15, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Jumping Jacks", count: 25, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Lateral Jumps", count: 20, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] } ] },
+                { level: 90, options: [ { name: "Push-ups", count: 30, type: "strength", timed: false, muscleGroups: ["chest", "arms", "shoulders"] }, { name: "Diamond Push-ups", count: 25, type: "strength", timed: false, muscleGroups: ["chest", "arms"] }, { name: "Decline Push-ups", count: 20, type: "strength", timed: false, muscleGroups: ["chest", "shoulders"] } ] },
+                { level: 91, options: [ { name: "Full Body Stretch Sequence", count: 45, type: "flexibility", timed: true, muscleGroups: ["fullBody"] }, { name: "Dynamic Stretching Routine", count: 40, type: "flexibility", timed: true, muscleGroups: ["fullBody"] }, { name: "Yoga Flow Sequence", count: 45, type: "flexibility", timed: true, muscleGroups: ["fullBody"] } ] },
+                { level: 92, options: [ { name: "Jumping Jack Burpees", count: 25, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Mountain Climber Burpees", count: 20, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Tuck Jump Burpees", count: 20, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] } ] },
+                { level: 93, options: [ { name: "Push-up with Rotation", count: 25, type: "strength", timed: false, muscleGroups: ["chest", "arms", "core"] }, { name: "Spiderman Push-ups", count: 20, type: "strength", timed: false, muscleGroups: ["chest", "arms", "core"] }, { name: "Archer Push-ups", count: 20, type: "strength", timed: false, muscleGroups: ["chest", "arms"] } ] },
+                { level: 94, options: [ { name: "Dynamic Hamstring Stretch", count: 30, type: "flexibility", timed: false, muscleGroups: ["legs"] }, { name: "Active Leg Swings", count: 35, type: "flexibility", timed: false, muscleGroups: ["legs"] }, { name: "Standing Split Pulses", count: 25, type: "flexibility", timed: false, muscleGroups: ["legs"] } ] },
+                { level: 95, options: [ { name: "Explosive Star Jumps", count: 30, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Tuck Jumps", count: 25, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] }, { name: "Split Jumps", count: 25, type: "cardio", timed: false, muscleGroups: ["legs", "cardio"] } ] },
+                { level: 96, options: [ { name: "Bear Crawl", count: 40, type: "strength", timed: true, muscleGroups: ["fullBody"] }, { name: "Crab Walk", count: 35, type: "strength", timed: true, muscleGroups: ["fullBody"] }, { name: "Gorilla Shuffle", count: 30, type: "strength", timed: true, muscleGroups: ["fullBody"] } ] },
+                { level: 97, options: [ { name: "World's Greatest Stretch", count: 20, type: "flexibility", timed: false, muscleGroups: ["fullBody"] }, { name: "Full Body Mobility Flow", count: 15, type: "flexibility", timed: false, muscleGroups: ["fullBody"] }, { name: "Dynamic Stretch Sequence", count: 25, type: "flexibility", timed: false, muscleGroups: ["fullBody"] } ] },
+                { level: 98, options: [ { name: "Burpee Challenge", count: 30, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Burpee Sprint Combo", count: 25, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio"] }, { name: "Burpee Push-up Combo", count: 25, type: "cardio", timed: false, muscleGroups: ["fullBody", "cardio", "chest"] } ] },
+                { level: 99, options: [ { name: "Plank Challenge", count: 60, type: "strength", timed: true, muscleGroups: ["core", "arms", "shoulders"] }, { name: "Plank Variation Circuit", count: 50, type: "strength", timed: true, muscleGroups: ["core", "arms", "shoulders"] }, { name: "Plank Hold Series", count: 55, type: "strength", timed: true, muscleGroups: ["core", "arms", "shoulders"] } ] },
+                { level: 100, options: [ { name: "Squats", count: 100, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Ultimate Squat Challenge", count: 90, type: "strength", timed: false, muscleGroups: ["legs"] }, { name: "Century Squat Test", count: 100, type: "strength", timed: false, muscleGroups: ["legs"] } ] }
+            ],
+            generateMissingLevels: function() {
+                for (let i = 26; i < 90; i++) {
+                    if (!this.exercises.find(ex => ex.level === i)) {
+                        const type1 = i % 3 === 0 ? "cardio" : i % 3 === 1 ? "strength" : "flexibility";
+                        const type2 = i % 3 === 0 ? "strength" : i % 3 === 1 ? "flexibility" : "cardio";
+                        const type3 = i % 3 === 0 ? "flexibility" : i % 3 === 1 ? "cardio" : "strength";
+                        const timed = i % 5 === 0;
+                        const count1 = Math.floor(i/3) + 10;
+                        const count2 = Math.floor(i/3) + 8;
+                        const count3 = Math.floor(i/3) + 12;
+                        
+                        const groups1 = type1 === "cardio" ? ["cardio", "fullBody"] : type1 === "strength" ? ["arms", "chest", "shoulders"][i % 3] : ["core", "legs"][i % 2];
+                        const groups2 = type2 === "strength" ? ["arms", "chest", "back"][i % 3] : type2 === "flexibility" ? ["core", "legs"][i % 2] : ["cardio", "fullBody"];
+                        const groups3 = type3 === "flexibility" ? ["core", "legs"][i % 2] : type3 === "cardio" ? ["cardio", "fullBody"] : ["arms", "chest", "shoulders", "back"][i % 4];
+                        
+                        this.exercises.push({
+                            level: i,
+                            options: [
+                                { name: `Exercise A Level ${i}`, count: count1, type: type1, timed: timed, muscleGroups: groups1 },
+                                { name: `Exercise B Level ${i}`, count: count2, type: type2, timed: timed, muscleGroups: groups2 },
+                                { name: `Exercise C Level ${i}`, count: count3, type: type3, timed: timed, muscleGroups: groups3 }
+                            ]
+                        });
+                    }
+                }
+                this.exercises.sort((a, b) => a.level - b.level);
+            },
+            filterByMuscleGroups: function(selectedGroups) {
+                if (!selectedGroups || selectedGroups.length === 0) {
+                    return this.exercises;
+                }
+                return this.exercises.map(levelExercises => {
+                    const filteredOptions = levelExercises.options.filter(exercise => {
+                        return exercise.muscleGroups.some(group => selectedGroups.includes(group));
+                    });
+                    return {
+                        level: levelExercises.level,
+                        options: filteredOptions.length > 0 ? filteredOptions : levelExercises.options // Fallback to all options if none match
+                    };
+                });
+            },
+            getRandomExerciseForLevel: function(level, selectedGroups) {
+                const filteredExercises = this.filterByMuscleGroups(selectedGroups);
+                const levelExercises = filteredExercises.find(ex => ex.level === level);
+                if (!levelExercises || levelExercises.options.length === 0) {
+                    console.error(`No exercises found for level ${level} with selected groups: ${selectedGroups.join(', ')}. Falling back.`);
+                    // Fallback: Get any exercise for the level
+                    const fallbackLevel = this.exercises.find(ex => ex.level === level);
+                    if (!fallbackLevel || fallbackLevel.options.length === 0) return null;
+                    const fallbackIndex = Math.floor(Math.random() * fallbackLevel.options.length);
+                    return fallbackLevel.options[fallbackIndex];
+                }
+                const randomIndex = Math.floor(Math.random() * levelExercises.options.length);
+                return levelExercises.options[randomIndex];
+            }
+        };
+        muscleGroupExercises.generateMissingLevels();
+
+        // --- Daily Challenges ---
+        const dailyChallenges = [
+            { title: "Speed Demon", description: "Complete 3 levels in under 5 minutes", reward: "Extra points" },
+            { title: "Cardio King", description: "Complete 5 cardio exercises today", reward: "Streak bonus" },
+            { title: "Strength Master", description: "Reach level 10 without restarting", reward: "Achievement badge" },
+            { title: "Flexibility Focus", description: "Hold all timed exercises for full duration", reward: "Unlock special exercise" },
+            { title: "Early Bird", description: "Complete your first workout before 9am", reward: "Morning person badge" },
+            { title: "Consistency Champion", description: "Work out 3 days in a row", reward: "Streak multiplier" },
+            { title: "Level Jumper", description: "Reach a new personal best level", reward: "Leaderboard points" }
+        ];
+
+        // --- Encouraging Messages ---
+        const encouragingMessages = [
+            "You crushed it! 💪", "Next level, here we go! 🚀", "Awesome job! 🔥", "Keep climbing that ladder! 🧗‍♂️",
+            "You're on fire! 🔥", "Level up! You're amazing! ⭐", "Fantastic work! 👏", "You're a workout warrior! ⚔️",
+            "Unstoppable! 💯", "Leveling up like a pro! 🏆", "That's the spirit! 🎉", "You're crushing this ladder! 🪜",
+            "Power move! 💥", "You make it look easy! 😎", "Incredible progress! 📈"
+        ];
+
+        // --- App State ---
+        let currentLevel = 1;
+        let currentExercise = null;
+        let timerInterval = null;
+        let timerSeconds = 0;
+        let isMuted = false;
+        let savedProgress = null;
+        let audioContext = null;
+        let startTime = null;
+        let totalTime = 0;
+        let difficultyMultiplier = 1; // 0.75 easy, 1 normal, 1.5 hard
+        let notificationsEnabled = false;
+        let currentDailyChallenge = null;
+        let leaderboardData = { workouts: {} }; // Enhanced structure
+        let selectedMuscleGroups = [];
+        let muscleGroupSelectionActive = true;
+        let workoutKey = "all";
+        let achievementProgress = {}; // For tracking achievements
+
+        // --- DOM Elements ---
+        const levelDisplay = document.getElementById("level-display");
+        const exerciseDetails = document.getElementById("exercise-details");
+        const exerciseName = document.getElementById("exercise-name");
+        const exerciseInstruction = document.getElementById("exercise-instruction");
+        const timerDisplay = document.getElementById("timer-display");
+        const actionButton = document.getElementById("action-button");
+        const messageDisplay = document.getElementById("message-display");
+        const muteButton = document.getElementById("mute-button");
+        const progressTracker = document.getElementById("progress-tracker");
+        const celebrationScreen = document.getElementById("celebration-screen");
+        const confettiContainer = document.getElementById("confetti-container");
+        const appContainer = document.querySelector(".app-container");
+        const restartButton = document.getElementById("restart-button");
+        const celebrationRestartButton = document.getElementById("celebration-restart-button");
+        const restartConfirm = document.getElementById("restart-confirm");
+        const restartConfirmYes = document.getElementById("restart-confirm-yes");
+        const restartConfirmNo = document.getElementById("restart-confirm-no");
+        const leaderboardButton = document.getElementById("leaderboard-button");
+        const leaderboardPanel = document.getElementById("leaderboard-panel");
+        const leaderboardClose = document.getElementById("leaderboard-close");
+        const levelTab = document.getElementById("level-tab");
+        const timeTab = document.getElementById("time-tab");
+        const levelLeaderboard = document.getElementById("level-leaderboard");
+        const timeLeaderboard = document.getElementById("time-leaderboard");
+        const levelTableBody = document.getElementById("level-table-body");
+        const timeTableBody = document.getElementById("time-table-body");
+        const leaderboardName = document.getElementById("leaderboard-name");
+        const leaderboardSubmit = document.getElementById("leaderboard-submit");
+        const settingsButton = document.getElementById("settings-button");
+        const settingsPanel = document.getElementById("settings-panel");
+        const settingsClose = document.getElementById("settings-close");
+        const easyMode = document.getElementById("easy-mode");
+        const normalMode = document.getElementById("normal-mode");
+        const hardMode = document.getElementById("hard-mode");
+        const notificationToggle = document.getElementById("notification-toggle");
+        const notification = document.getElementById("notification");
+        const notificationMessage = document.getElementById("notification-message");
+        const dailyChallengeContainer = document.getElementById("daily-challenge-container");
+        const dailyChallengeDescription = document.getElementById("daily-challenge-description");
+
+        // --- Muscle Group Selection Logic ---
+        function createMuscleGroupSelectionScreen() {
+            const selectionPanel = document.createElement("div");
+            selectionPanel.className = "muscle-group-selection-panel";
+            selectionPanel.id = "muscle-group-selection";
+            const header = document.createElement("div");
+            header.className = "selection-header";
+            header.innerHTML = `<h2>Select Muscle Groups</h2><p>Choose one or more muscle groups to target</p>`;
+            selectionPanel.appendChild(header);
+            const optionsContainer = document.createElement("div");
+            optionsContainer.className = "muscle-group-options";
+            muscleGroupExercises.muscleGroups.forEach(group => {
+                const option = document.createElement("div");
+                option.className = "muscle-group-option";
+                option.dataset.id = group.id;
+                option.innerHTML = `<div class="muscle-icon">${group.icon}</div><div class="muscle-name">${group.name}</div>`;
+                option.addEventListener("click", () => toggleMuscleGroupSelection(option, group.id));
+                optionsContainer.appendChild(option);
+            });
+            selectionPanel.appendChild(optionsContainer);
+            const actionButtons = document.createElement("div");
+            actionButtons.className = "selection-actions";
+            const selectAllButton = document.createElement("button");
+            selectAllButton.className = "selection-button select-all";
+            selectAllButton.textContent = "Select All";
+            selectAllButton.addEventListener("click", selectAllMuscleGroups);
+            const clearButton = document.createElement("button");
+            clearButton.className = "selection-button clear";
+            clearButton.textContent = "Clear";
+            clearButton.addEventListener("click", clearMuscleGroupSelection);
+            const startButton = document.createElement("button");
+            startButton.className = "selection-button start disabled";
+            startButton.textContent = "Start Workout";
+            startButton.disabled = true;
+            startButton.addEventListener("click", startWorkoutWithSelectedGroups);
+            actionButtons.appendChild(selectAllButton);
+            actionButtons.appendChild(clearButton);
+            actionButtons.appendChild(startButton);
+            selectionPanel.appendChild(actionButtons);
+            return selectionPanel;
+        }
+
+        function toggleMuscleGroupSelection(element, groupId) {
+            const index = selectedMuscleGroups.indexOf(groupId);
+            if (index === -1) {
+                selectedMuscleGroups.push(groupId);
+                element.classList.add("selected");
+            } else {
+                selectedMuscleGroups.splice(index, 1);
+                element.classList.remove("selected");
+            }
+            updateStartButtonState();
+        }
+
+        function selectAllMuscleGroups() {
+            selectedMuscleGroups = muscleGroupExercises.muscleGroups.map(group => group.id);
+            document.querySelectorAll(".muscle-group-option").forEach(option => option.classList.add("selected"));
+            updateStartButtonState();
+        }
+
+        function clearMuscleGroupSelection() {
+            selectedMuscleGroups = [];
+            document.querySelectorAll(".muscle-group-option").forEach(option => option.classList.remove("selected"));
+            updateStartButtonState();
+        }
+
+        function updateStartButtonState() {
+            const startButton = document.querySelector(".selection-button.start");
+            if (selectedMuscleGroups.length > 0) {
+                startButton.disabled = false;
+                startButton.classList.remove("disabled");
+            } else {
+                startButton.disabled = true;
+                startButton.classList.add("disabled");
+            }
+        }
+
+        function startWorkoutWithSelectedGroups() {
+            if (selectedMuscleGroups.length === 0) {
+                selectAllMuscleGroups();
+            }
+            workoutKey = selectedMuscleGroups.sort().join("-") || "all";
+            loadProgressForWorkout(workoutKey);
+            const selectionPanel = document.getElementById("muscle-group-selection");
+            selectionPanel.style.display = "none";
+            appContainer.style.display = "block";
+            muscleGroupSelectionActive = false;
+            initWorkout();
+            playSound("celebration");
+        }
+
+        // --- Enhanced Leaderboard and Progress Tracking ---
+        function enhanceLeaderboardForMuscleGroups() {
+            const enhancedData = { workouts: {} };
+            if (localStorage.getItem("levelUpLadderLeaderboard")) {
+                try {
+                    const oldData = JSON.parse(localStorage.getItem("levelUpLadderLeaderboard"));
+                    if (oldData.workouts) { // Already new format
+                        return oldData;
+                    }
+                    if (oldData.level && oldData.level.length > 0) { // Migrate old format
+                        enhancedData.workouts["all"] = { level: oldData.level, time: oldData.time || [] };
+                    }
+                } catch (e) { console.error("Error migrating leaderboard:", e); }
+            }
+            return enhancedData;
+        }
+
+        function updateLeaderboardDisplayForWorkout(key) {
+            levelTableBody.innerHTML = "";
+            timeTableBody.innerHTML = "";
+            const workoutData = leaderboardData.workouts[key];
+            if (!workoutData || (!workoutData.level.length && !workoutData.time.length)) {
+                levelTableBody.innerHTML = `<tr><td colspan="4">No records yet for this workout</td></tr>`;
+                timeTableBody.innerHTML = `<tr><td colspan="4">No records yet for this workout</td></tr>`;
+                return;
+            }
+            if (workoutData.level) {
+                [...workoutData.level].sort((a, b) => b.level - a.level).forEach((entry, index) => {
+                    const row = levelTableBody.insertRow();
+                    row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${entry.level}</td><td>${new Date(entry.date).toLocaleDateString()}</td>`;
+                });
+            }
+            if (workoutData.time) {
+                [...workoutData.time].sort((a, b) => a.time - b.time).forEach((entry, index) => {
+                    const row = timeTableBody.insertRow();
+                    row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${formatTime(entry.time)}</td><td>${new Date(entry.date).toLocaleDateString()}</td>`;
+                });
+            }
+        }
+
+        function addLeaderboardEntryForWorkout(type, key) {
+            const name = leaderboardName.value.trim() || "Anonymous";
+            if (!leaderboardData.workouts[key]) {
+                leaderboardData.workouts[key] = { level: [], time: [] };
+            }
+            const entry = {
+                name: name,
+                date: new Date().toISOString(),
+                muscleGroups: selectedMuscleGroups
+            };
+            if (type === "level") {
+                entry.level = currentLevel;
+                leaderboardData.workouts[key].level.push(entry);
+                leaderboardData.workouts[key].level.sort((a, b) => b.level - a.level);
+                leaderboardData.workouts[key].level = leaderboardData.workouts[key].level.slice(0, 10);
+            } else if (type === "time" && totalTime > 0) {
+                entry.time = totalTime;
+                leaderboardData.workouts[key].time.push(entry);
+                leaderboardData.workouts[key].time.sort((a, b) => a.time - b.time);
+                leaderboardData.workouts[key].time = leaderboardData.workouts[key].time.slice(0, 10);
+            }
+            saveEnhancedLeaderboard();
+            updateLeaderboardDisplayForWorkout(key);
+            leaderboardName.value = "";
+        }
+
+        function saveEnhancedLeaderboard() {
+            try {
+                localStorage.setItem("levelUpLadderLeaderboard", JSON.stringify(leaderboardData));
+            } catch (e) { console.error("Error saving leaderboard:", e); }
+        }
+
+        function loadEnhancedLeaderboard() {
+            leaderboardData = enhanceLeaderboardForMuscleGroups();
+        }
+
+        function createWorkoutSelector() {
+            const container = document.createElement("div");
+            container.className = "workout-selector";
+            const label = document.createElement("label");
+            label.textContent = "Workout Type:";
+            container.appendChild(label);
+            const select = document.createElement("select");
+            select.id = "workout-selector";
+            const allOption = document.createElement("option");
+            allOption.value = "all";
+            allOption.textContent = "All Workouts";
+            select.appendChild(allOption);
+            Object.keys(leaderboardData.workouts).forEach(key => {
+                if (key === "all") return;
+                const option = document.createElement("option");
+                option.value = key;
+                const muscleNames = key.split("-").map(id => muscleGroupExercises.muscleGroups.find(g => g.id === id)?.name || id);
+                option.textContent = muscleNames.join(" + ");
+                select.appendChild(option);
+            });
+            select.addEventListener("change", () => updateLeaderboardDisplayForWorkout(select.value));
+            container.appendChild(select);
+            return container;
+        }
+
+        function addWorkoutSelectorToLeaderboard() {
+            const header = document.querySelector(".leaderboard-header");
+            const existingSelector = header.querySelector(".workout-selector");
+            if (existingSelector) existingSelector.remove();
+            const selector = createWorkoutSelector();
+            header.insertBefore(selector, header.querySelector("button"));
+        }
+
+        function createWorkoutProgressSummary() {
+            const container = document.createElement("div");
+            container.className = "workout-progress-section";
+            const title = document.createElement("h3");
+            title.className = "workout-progress-title";
+            title.textContent = "Your Workout Progress";
+            container.appendChild(title);
+            const list = document.createElement("div");
+            list.className = "workout-progress-list";
+            let hasProgress = false;
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key.startsWith("levelUpLadder_") && !key.startsWith("levelUpLadderLeaderboard")) {
+                    try {
+                        const workoutData = JSON.parse(localStorage.getItem(key));
+                        if (workoutData && workoutData.level) {
+                            hasProgress = true;
+                            const item = document.createElement("div");
+                            item.className = "workout-progress-item";
+                            let workoutName = "All Muscles";
+                            if (workoutData.muscleGroups && workoutData.muscleGroups.length > 0) {
+                                workoutName = workoutData.muscleGroups.map(id => muscleGroupExercises.muscleGroups.find(g => g.id === id)?.icon || "").join(" ");
+                            }
+                            item.innerHTML = `<div class="workout-progress-name">${workoutName}</div><div class="workout-progress-level">Level ${workoutData.level}</div>`;
+                            list.appendChild(item);
+                        }
+                    } catch (e) { console.error(`Error loading workout data for ${key}:`, e); }
+                }
+            }
+            if (!hasProgress) {
+                list.innerHTML = `<p>No workout progress saved yet.</p>`;
+            }
+            container.appendChild(list);
+            return container;
+        }
+
+        function addWorkoutProgressToSettings() {
+            const existingSummary = settingsPanel.querySelector(".workout-progress-section");
+            if (existingSummary) existingSummary.remove();
+            const summary = createWorkoutProgressSummary();
+            settingsPanel.appendChild(summary);
+        }
+
+        // --- Core App Logic ---
+        function loadProgressForWorkout(key) {
+            const savedData = localStorage.getItem(`levelUpLadder_${key}`);
+            if (savedData) {
+                try {
+                    savedProgress = JSON.parse(savedData);
+                    if (typeof savedProgress.level === "number" && savedProgress.level > 0 && savedProgress.level <= 100) {
+                        currentLevel = savedProgress.level;
+                    } else {
+                        currentLevel = 1;
+                    }
+                    setDifficulty(savedProgress.difficulty || 1);
+                    notificationsEnabled = savedProgress.notifications !== undefined ? savedProgress.notifications : false;
+                    notificationToggle.checked = notificationsEnabled;
+                } catch (e) {
+                    console.error("Error parsing saved progress:", e);
+                    currentLevel = 1;
+                }
+            } else {
+                currentLevel = 1;
+            }
+            updateProgressDisplay();
+        }
+
+        function saveProgressForWorkout(key) {
+            const progressData = {
+                level: currentLevel,
+                timestamp: new Date().toISOString(),
+                difficulty: difficultyMultiplier,
+                notifications: notificationsEnabled,
+                muscleGroups: selectedMuscleGroups
+            };
+            try {
+                localStorage.setItem(`levelUpLadder_${key}`, JSON.stringify(progressData));
+            } catch (e) { console.error("Error saving progress:", e); }
+        }
+
+        function updateProgressDisplay() {
+    // Assuming levelDisplay, progressTracker, and currentLevel are accessible in this scope
+    levelDisplay.textContent = `Level ${currentLevel}`;
+    progressTracker.textContent = `Progress: Level ${currentLevel}`;
+
+    // --- Corrected code starts here ---
+    try {
+        // Get the computed style of the root element (where the CSS variables are defined)
+        const computedStyle = getComputedStyle(document.documentElement);
+
+        // Get the string values of the CSS variables and trim whitespace
+        const hueStartStr = computedStyle.getPropertyValue("--hue-start").trim();
+        const hueEndStr = computedStyle.getPropertyValue("--hue-end").trim();
+
+        // Parse the string values into floating-point numbers
+        const hueStart = parseFloat(hueStartStr);
+        const hueEnd = parseFloat(hueEndStr);
+
+        // Check if parsing was successful before calculating
+        if (!isNaN(hueStart) && !isNaN(hueEnd)) {
+            // Calculate the hue based on the current level (ensure currentLevel is between 0 and 100 for this formula)
+            // Clamp currentLevel between 1 and 100 for the hue calculation if needed
+            const levelRatio = Math.max(1, Math.min(currentLevel, 100)) / 100;
+            const hue = hueStart + levelRatio * (hueEnd - hueStart);
+
+            // Update the CSS variables dynamically
+            document.documentElement.style.setProperty("--primary-color", `hsl(${hue}, 70%, 60%)`);
+            document.documentElement.style.setProperty("--secondary-color", `hsl(${hue}, 50%, 95%)`);
+            // You might need to update other dependent variables if they use --primary-color
+            // e.g., document.documentElement.style.setProperty("--button-bg", `hsl(${hue}, 70%, 60%)`);
+
+        } else {
+            console.error("Error parsing CSS variables --hue-start or --hue-end. Values:", hueStartStr, hueEndStr);
+            // Fallback or default colors if parsing fails
+            document.documentElement.style.setProperty("--primary-color", "hsl(200, 70%, 60%)"); 
+            document.documentElement.style.setProperty("--secondary-color", "hsl(200, 50%, 95%)");
+        }
+    } catch (error) {
+        console.error("Error updating progress display colors:", error);
+        // Fallback or default colors in case of any error
+        document.documentElement.style.setProperty("--primary-color", "hsl(200, 70%, 60%)"); 
+        document.documentElement.style.setProperty("--secondary-color", "hsl(200, 50%, 95%)");
+    }
+    // --- Corrected code ends here ---
+}
+        function getRandomExercise(level) {
+            return muscleGroupExercises.getRandomExerciseForLevel(level, selectedMuscleGroups);
+        }
+
+        function showExerciseDetails() {
+            currentExercise = getRandomExercise(currentLevel);
+            if (!currentExercise) {
+                messageDisplay.textContent = "Error: No exercise found for this level/selection.";
+                actionButton.disabled = true;
+                return;
+            }
+            actionButton.disabled = false;
+            exerciseDetails.classList.remove("fade-in");
+            exerciseDetails.classList.add("fade-out");
+
+            setTimeout(() => {
+                exerciseName.textContent = currentExercise.name;
+                let instruction = ``;
+                if (currentExercise.timed) {
+                    timerSeconds = Math.round(currentExercise.count * difficultyMultiplier);
+                    instruction = `Hold for ${timerSeconds} seconds`;
+                    timerDisplay.textContent = formatTime(timerSeconds);
+                    timerDisplay.style.display = "block";
+                    actionButton.textContent = "Start Timer";
+                } else {
+                    const count = Math.round(currentExercise.count * difficultyMultiplier);
+                    instruction = `Do ${count} reps`;
+                    timerDisplay.style.display = "none";
+                    actionButton.textContent = "Done!";
+                }
+                exerciseInstruction.textContent = instruction;
+                exerciseDetails.classList.remove("fade-out");
+                exerciseDetails.classList.add("fade-in");
+            }, 500);
+        }
+
+        function startTimer() {
+            actionButton.disabled = true;
+            actionButton.textContent = `Time: ${formatTime(timerSeconds)}`;
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                actionButton.textContent = `Time: ${formatTime(timerSeconds)}`;
+                timerDisplay.textContent = formatTime(timerSeconds);
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    actionButton.disabled = false;
+                    actionButton.textContent = "Done!";
+                    playSound("timer-end");
+                    messageDisplay.textContent = "Time's up! Click Done! when ready.";
+                }
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+        }
+
+        function advanceLevel() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            currentLevel++;
+            updateProgressDisplay();
+            saveProgressForWorkout(workoutKey);
+            trackAchievement("level", currentLevel);
+
+            if (currentLevel > 100) {
+                showCelebration();
+            } else {
+                showExerciseDetails();
+                const randomMessage = encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
+                messageDisplay.textContent = randomMessage;
+                playSound("level-complete");
+            }
+        }
+
+        function showCelebration() {
+            totalTime = Math.floor((Date.now() - startTime) / 1000);
+            celebrationScreen.classList.add("active");
+            createConfetti();
+            playSound("celebration");
+            trackAchievement("completion", totalTime);
+            // Automatically try to add to leaderboard if score is good
+            addLeaderboardEntryForWorkout("level", workoutKey);
+            addLeaderboardEntryForWorkout("time", workoutKey);
+        }
+
+        function createConfetti() {
+            confettiContainer.innerHTML = "";
+            const colors = ["#f44336", "#e91e63", "#9c27b0", "#673ab7", "#3f51b5", "#2196f3", "#03a9f4", "#00bcd4", "#009688", "#4caf50", "#8bc34a", "#cddc39", "#ffeb3b", "#ffc107", "#ff9800", "#ff5722"];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement("div");
+                confetti.classList.add("confetti");
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.top = `${Math.random() * -20}%`; // Start above screen
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 2}s`;
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                confettiContainer.appendChild(confetti);
+            }
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            muteButton.textContent = isMuted ? "Unmute" : "Mute";
+            if (!isMuted && !audioContext) {
+                initAudio();
+            }
+        }
+
+        function initAudio() {
+            if (!audioContext) {
+                try {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.error("Web Audio API not supported");
+                    isMuted = true;
+                    muteButton.disabled = true;
+                    muteButton.textContent = "Sound N/A";
+                }
+            }
+        }
+
+        function playSound(soundType) {
+            if (isMuted || !audioContext) return;
+            let freq1, freq2, freq3, freq4, duration1, duration2, duration3, duration4, type;
+            const now = audioContext.currentTime;
+            switch (soundType) {
+                case "level-complete": freq1 = 440; freq2 = 880; duration1 = 0.1; duration2 = 0.15; type = "sine"; break;
+                case "timer-end": freq1 = 660; freq2 = 550; duration1 = 0.1; duration2 = 0.2; type = "square"; break;
+                case "celebration":
+                    freq1 = 523.25; freq2 = 659.25; freq3 = 783.99;
+                    duration1 = 0.1; duration2 = 0.1; duration3 = 0.15; type = "triangle";
+                    playTone(freq1, now, duration1, type);
+                    playTone(freq2, now + 0.05, duration2, type);
+                    playTone(freq3, now + 0.1, duration3, type);
+                    return;
+                case "button-click": freq1 = 300; duration1 = 0.05; type = "square"; playTone(freq1, now, duration1, type); return;
+                case "restart": freq1 = 330; freq2 = 220; duration1 = 0.1; duration2 = 0.15; type = "triangle"; break;
+                case "notification": freq1 = 587.33; freq2 = 783.99; duration1 = 0.1; duration2 = 0.1; type = "sine"; break;
+                case "achievement":
+                    freq1 = 523.25; freq2 = 659.25; freq3 = 783.99; freq4 = 1046.50;
+                    duration1 = 0.1; duration2 = 0.1; duration3 = 0.1; duration4 = 0.2; type = "triangle";
+                    playTone(freq1, now, duration1, type);
+                    playTone(freq2, now + 0.1, duration2, type);
+                    playTone(freq3, now + 0.2, duration3, type);
+                    playTone(freq4, now + 0.3, duration4, type);
+                    return;
+                default: return;
+            }
+            playTone(freq1, now, duration1, type);
+            if (freq2) {
+                playTone(freq2, now + duration1 + 0.02, duration2, type);
+            }
+        }
+
+        function playTone(frequency, startTime, duration, type = "sine") {
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            oscillator.type = type;
+            oscillator.frequency.setValueAtTime(frequency, startTime);
+            gainNode.gain.setValueAtTime(0.5, startTime); // Volume
+            gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
+        }
+
+        function showRestartConfirm() {
+            restartConfirm.classList.add("active");
+            playSound("button-click");
+        }
+
+        function hideRestartConfirm() {
+            restartConfirm.classList.remove("active");
+        }
+
+        function restartWorkout() {
+            hideRestartConfirm();
+            currentLevel = 1;
+            totalTime = 0;
+            startTime = Date.now();
+            updateProgressDisplay();
+            saveProgressForWorkout(workoutKey); // Reset progress for this workout
+            showExerciseDetails();
+            messageDisplay.textContent = "Restarted! Back to Level 1.";
+            celebrationScreen.classList.remove("active");
+            confettiContainer.innerHTML = "";
+            playSound("restart");
+        }
+
+        function showLeaderboard() {
+            addWorkoutSelectorToLeaderboard();
+            const selector = document.getElementById("workout-selector");
+            if (selector.querySelector(`option[value="${workoutKey}"]`)) {
+                selector.value = workoutKey;
+            } else {
+                selector.value = "all"; // Default if current workout not in leaderboard yet
+            }
+            updateLeaderboardDisplayForWorkout(selector.value);
+            leaderboardPanel.classList.add("active");
+            playSound("button-click");
+        }
+
+        function hideLeaderboard() {
+            leaderboardPanel.classList.remove("active");
+        }
+
+        function switchLeaderboardTab(tab) {
+            if (tab === "level") {
+                levelTab.classList.add("active");
+                timeTab.classList.remove("active");
+                levelLeaderboard.style.display = "block";
+                timeLeaderboard.style.display = "none";
+            } else {
+                levelTab.classList.remove("active");
+                timeTab.classList.add("active");
+                levelLeaderboard.style.display = "none";
+                timeLeaderboard.style.display = "block";
+            }
+            playSound("button-click");
+        }
+
+        function addLeaderboardEntry(type) {
+            const selectedWorkoutKey = document.getElementById("workout-selector")?.value || workoutKey;
+            addLeaderboardEntryForWorkout(type, selectedWorkoutKey);
+        }
+
+        function showSettings() {
+            addWorkoutProgressToSettings(); // Refresh progress summary
+            settingsPanel.classList.add("active");
+            playSound("button-click");
+        }
+
+        function hideSettings() {
+            settingsPanel.classList.remove("active");
+        }
+
+        function setDifficulty(difficulty) {
+            easyMode.classList.remove("active");
+            normalMode.classList.remove("active");
+            hardMode.classList.remove("active");
+            if (difficulty === 0.75) {
+                difficultyMultiplier = 0.75;
+                easyMode.classList.add("active");
+            } else if (difficulty === 1.5) {
+                difficultyMultiplier = 1.5;
+                hardMode.classList.add("active");
+            } else {
+                difficultyMultiplier = 1;
+                normalMode.classList.add("active");
+            }
+            saveProgressForWorkout(workoutKey); // Save setting
+            playSound("button-click");
+            // Update current exercise instruction if needed
+            if (!muscleGroupSelectionActive && currentExercise) {
+                showExerciseDetails();
+            }
+        }
+
+        function toggleNotifications() {
+            notificationsEnabled = notificationToggle.checked;
+            saveProgressForWorkout(workoutKey); // Save setting
+            playSound("button-click");
+            if (notificationsEnabled) {
+                showNotification("Notifications Enabled!");
+            } else {
+                showNotification("Notifications Disabled.");
+            }
+        }
+
+        function showNotification(message) {
+            if (!notificationsEnabled) return;
+            notificationMessage.textContent = message;
+            notification.classList.add("show");
+            playSound("notification");
+            setTimeout(() => {
+                notification.classList.remove("show");
+            }, 3000);
+        }
+
+        function generateDailyChallenge() {
+            const today = new Date().toDateString();
+            const lastChallengeDate = localStorage.getItem("lastChallengeDate");
+            if (today !== lastChallengeDate) {
+                currentDailyChallenge = dailyChallenges[Math.floor(Math.random() * dailyChallenges.length)];
+                localStorage.setItem("lastChallengeDate", today);
+                localStorage.setItem("currentChallenge", JSON.stringify(currentDailyChallenge));
+                localStorage.setItem("challengeCompleted", "false");
+            } else {
+                const savedChallenge = localStorage.getItem("currentChallenge");
+                if (savedChallenge) {
+                    currentDailyChallenge = JSON.parse(savedChallenge);
+                }
+            }
+            
+            if (currentDailyChallenge && localStorage.getItem("challengeCompleted") !== "true") {
+                dailyChallengeDescription.textContent = currentDailyChallenge.description;
+                dailyChallengeContainer.style.display = "block";
+                if (notificationsEnabled) {
+                    showNotification(`Today's Challenge: ${currentDailyChallenge.title}`);
+                }
+            } else {
+                dailyChallengeContainer.style.display = "none";
+            }
+        }
+
+        function checkDailyChallengeCompletion() {
+            // Basic example: Check if level 10 reached for Strength Master
+            if (currentDailyChallenge && currentDailyChallenge.title === "Strength Master" && currentLevel >= 10) {
+                completeDailyChallenge();
+            }
+            // Add more checks for other challenges
+        }
+
+        function completeDailyChallenge() {
+            if (!currentDailyChallenge || localStorage.getItem("challengeCompleted") === "true") return;
+            localStorage.setItem("challengeCompleted", "true");
+            dailyChallengeContainer.style.display = "none";
+            showNotification(`Challenge Complete: ${currentDailyChallenge.title}! Reward: ${currentDailyChallenge.reward}`);
+            trackAchievement("challenge", currentDailyChallenge.title);
+            playSound("achievement");
+        }
+
+        function trackAchievement(type, value) {
+            // Example: Track highest level reached for current workout
+            if (type === "level") {
+                const bestLevelKey = `bestLevel_${workoutKey}`;
+                const bestLevel = parseInt(localStorage.getItem(bestLevelKey) || "0");
+                if (value > bestLevel) {
+                    localStorage.setItem(bestLevelKey, value);
+                    showNotification(`New Personal Best: Level ${value}!`);
+                    playSound("achievement");
+                }
+            }
+            // Add more achievement tracking (streaks, fastest time, etc.)
+        }
+
+        // --- Initialization ---
+        function initApp() {
+            initAudio();
+            loadEnhancedLeaderboard();
+            
+            // Event Listeners
+            actionButton.addEventListener("click", () => {
+                if (currentExercise.timed && !timerInterval && timerSeconds > 0) {
+                    startTimer();
+                } else if (!timerInterval) { // Prevents clicking done while timer runs
+                    advanceLevel();
+                    checkDailyChallengeCompletion();
+                }
+            });
+            muteButton.addEventListener("click", toggleMute);
+            restartButton.addEventListener("click", showRestartConfirm);
+            celebrationRestartButton.addEventListener("click", restartWorkout);
+            restartConfirmYes.addEventListener("click", restartWorkout);
+            restartConfirmNo.addEventListener("click", hideRestartConfirm);
+            leaderboardButton.addEventListener("click", showLeaderboard);
+            leaderboardClose.addEventListener("click", hideLeaderboard);
+            levelTab.addEventListener("click", () => switchLeaderboardTab("level"));
+            timeTab.addEventListener("click", () => switchLeaderboardTab("time"));
+            leaderboardSubmit.addEventListener("click", () => {
+                const activeTab = levelTab.classList.contains("active") ? "level" : "time";
+                addLeaderboardEntry(activeTab);
+            });
+            settingsButton.addEventListener("click", showSettings);
+            settingsClose.addEventListener("click", hideSettings);
+            easyMode.addEventListener("click", () => setDifficulty(0.75));
+            normalMode.addEventListener("click", () => setDifficulty(1));
+            hardMode.addEventListener("click", () => setDifficulty(1.5));
+            notificationToggle.addEventListener("change", toggleNotifications);
+            
+            // Initialize muscle group selection screen
+            const selectionScreen = createMuscleGroupSelectionScreen();
+            document.body.insertBefore(selectionScreen, appContainer);
+        }
+        
+        function initWorkout() {
+            // Called after muscle groups are selected
+            startTime = Date.now();
+            updateProgressDisplay();
+            showExerciseDetails();
+            messageDisplay.textContent = "Let's get moving!";
+            generateDailyChallenge();
+            setDifficulty(difficultyMultiplier); // Apply saved difficulty
+        }
+
+        window.addEventListener("DOMContentLoaded", initApp);
+
+    </script>
+</body>
+</html>
+
