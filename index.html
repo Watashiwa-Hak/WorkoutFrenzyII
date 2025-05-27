@@ -1103,7 +1103,7 @@
                 }
                 return this.exercises.map(levelExercises => {
                     const filteredOptions = levelExercises.options.filter(exercise => {
-                        return exercise.muscleGroups.some(group => selectedGroups.includes(group));
+                        return Array.isArray(exercise.muscleGroups) && Array.isArray(selectedGroups) && exercise.muscleGroups.some(group => selectedGroups.includes(group));
                     });
                     return {
                         level: levelExercises.level,
@@ -1883,6 +1883,17 @@
             
             // Event Listeners
             actionButton.addEventListener("click", () => {
+                // --- Correction Start ---
+                // Check if currentExercise is valid before accessing its properties
+                if (!currentExercise) {
+                    console.error("Action button clicked, but currentExercise is not set.");
+                    // Optionally display a message to the user or disable the button further
+                    // Example: messageDisplay.textContent = "Error: No exercise loaded.";
+                    return; // Exit the function if no current exercise is loaded
+                }
+                // --- Correction End ---
+
+                // Original logic continues here...
                 if (currentExercise.timed && !timerInterval && timerSeconds > 0) {
                     startTimer();
                 } else if (!timerInterval) { // Prevents clicking done while timer runs
